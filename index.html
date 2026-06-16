@@ -1,0 +1,1318 @@
+!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>貓咪狂歡吃飽飽：分裂大作戰 🐱</title>
+    <!-- Tailwind CSS for sleek UI styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for cozy and cute typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for cute icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Quicksand', 'Fredoka One', system-ui, -apple-system, sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+        }
+        .cute-font {
+            font-family: 'Fredoka One', cursive;
+        }
+        /* Custom scrollbar for modern shop styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #ffe3e3;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ffb3b3;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ff9494;
+        }
+        /* Glowing effects for buttons */
+        .btn-glow-orange {
+            box-shadow: 0 4px 15px rgba(251, 146, 60, 0.4);
+            transition: all 0.2s;
+        }
+        .btn-glow-orange:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(251, 146, 60, 0.6);
+        }
+        /* Floating animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        .floating-element {
+            animation: float 3s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="bg-[#FFF5F5] overflow-hidden w-screen h-screen relative">
+
+    <!-- Start Screen Overlay with cute cat theme -->
+    <div id="startScreen" class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gradient-to-br from-[#FFEAEA] to-[#FFD1D1] p-6 text-center">
+        <div class="max-w-md bg-white rounded-3xl p-8 shadow-2xl border-4 border-[#FFAAA6] relative floating-element">
+            <div class="absolute -top-16 left-1/2 -translate-x-1/2 text-8xl">🐱</div>
+            <h1 class="cute-font text-4xl text-[#FF6B6B] mt-4 mb-2">貓咪吃飽飽</h1>
+            <h2 class="cute-font text-2xl text-[#FFAAA6] mb-6">分裂大作戰！</h2>
+            
+            <p class="text-gray-600 text-sm mb-6 leading-relaxed">
+                控制你的小貓，在地圖上瘋狂吃飼料與罐罐！<br>
+                貓咪會<b>越吃越大隻</b>。當體型足夠時：<br>
+                <span class="bg-orange-100 text-orange-600 px-2 py-1 rounded font-bold animate-pulse">按空白鍵</span> 或 <span class="bg-orange-100 text-orange-600 px-2 py-1 rounded font-bold animate-pulse">點擊右側分裂按鈕</span>，<br>
+                就能把大貓咪<b>分裂</b>成兩隻！打造超萌貓咪軍團！<br>
+                <span class="text-red-500 font-bold"><i class="fa-solid fa-triangle-exclamation"></i> 避開橫衝直撞的掃地機器人！</span>
+            </p>
+
+            <!-- Color Palette / Skin Selector -->
+            <div class="mb-6">
+                <span class="text-gray-700 font-bold text-sm block mb-2">選擇你的初始貓咪：</span>
+                <div class="flex justify-center gap-3" id="skinSelector">
+                    <!-- Dynamic skin selections will be added here -->
+                </div>
+            </div>
+
+            <button onclick="startGame()" class="btn-glow-orange w-full bg-gradient-to-r from-orange-400 to-pink-500 text-white cute-font text-2xl py-4 px-8 rounded-2xl shadow-lg border-b-4 border-orange-600 active:translate-y-1">
+                開始遊戲 <i class="fa-solid fa-play ml-2"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Game UI Overlay -->
+    <div class="absolute top-4 left-4 right-4 z-40 flex justify-between items-start pointer-events-none">
+        <!-- Stats Panel -->
+        <div class="bg-white/90 backdrop-blur-sm p-4 rounded-2xl shadow-lg border-2 border-pink-100 pointer-events-auto flex items-center gap-6">
+            <div>
+                <span class="text-xs text-pink-400 block font-bold">貓咪數量</span>
+                <span id="uiCatCount" class="cute-font text-2xl text-[#FF6B6B]">1 / 50</span>
+            </div>
+            <div class="w-[2px] h-10 bg-pink-100"></div>
+            <div>
+                <span class="text-xs text-orange-400 block font-bold">貓幣 (CAT COINS)</span>
+                <span id="uiCoins" class="cute-font text-2xl text-orange-500"><i class="fa-solid fa-coins mr-1"></i>0</span>
+            </div>
+            <div class="w-[2px] h-10 bg-pink-100"></div>
+            <div>
+                <span class="text-xs text-purple-400 block font-bold">目前最高得分</span>
+                <span id="uiScore" class="cute-font text-2xl text-purple-600">0</span>
+            </div>
+        </div>
+
+        <!-- Controls / Buttons Panel -->
+        <div class="flex flex-col gap-3 pointer-events-auto items-end">
+            <!-- Split Button (Responsive/Touch alternative) -->
+            <button id="splitBtn" onclick="triggerSplit()" class="btn-glow-orange bg-gradient-to-r from-[#FF8E53] to-[#FF6B6B] text-white cute-font px-6 py-3 rounded-2xl flex items-center gap-2 border-b-4 border-red-700 transition-all active:translate-y-0.5">
+                <i class="fa-solid fa-scissors"></i> 分裂！(SPACE)
+                <span id="splitBadge" class="bg-orange-200 text-orange-700 text-xs px-2 py-0.5 rounded-full font-bold">0%</span>
+            </button>
+            
+            <!-- Quick Growth Cheat Button for testing -->
+            <button onclick="cheatGrow()" class="bg-green-500 hover:bg-green-600 text-white font-bold px-4 py-2 rounded-2xl shadow-md flex items-center gap-2 transition-all text-xs border-b-4 border-green-700 active:translate-y-0.5">
+                <i class="fa-solid fa-wand-magic-sparkles animate-pulse"></i> 瞬間變大 (測試魔法)
+            </button>
+            
+            <!-- Shop Trigger -->
+            <button onclick="toggleShop()" class="bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold px-4 py-2.5 rounded-2xl shadow-md flex items-center gap-2 transition-all">
+                <i class="fa-solid fa-store text-lg"></i> 喵喵商店
+            </button>
+        </div>
+    </div>
+
+    <!-- Shop Modal Overlay -->
+    <div id="shopModal" class="hidden absolute inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-[#FFF5F5] w-full max-w-lg rounded-3xl shadow-2xl border-4 border-[#FFAAA6] overflow-hidden max-h-[90vh] flex flex-col">
+            <!-- Shop Header -->
+            <div class="bg-gradient-to-r from-pink-400 to-orange-400 p-6 text-white flex justify-between items-center">
+                <h3 class="cute-font text-2xl"><i class="fa-solid fa-store mr-2"></i>喵喵雜貨店</h3>
+                <button onclick="toggleShop()" class="bg-white/20 hover:bg-white/30 text-white rounded-full w-10 h-10 flex items-center justify-center text-xl font-bold">✕</button>
+            </div>
+            <!-- Shop Content -->
+            <div class="p-6 overflow-y-auto flex-1 space-y-4">
+                <div class="bg-amber-50 rounded-2xl p-4 border border-amber-200 flex justify-between items-center mb-4">
+                    <span class="text-amber-900 font-bold">您的錢包：</span>
+                    <span id="shopCoins" class="cute-font text-2xl text-amber-600"><i class="fa-solid fa-coins mr-1"></i>0</span>
+                </div>
+
+                <!-- Upgrade Item 1 -->
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-pink-100 flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="bg-orange-100 w-12 h-12 rounded-xl flex items-center justify-center text-2xl">⚡</div>
+                        <div>
+                            <h4 class="font-bold text-gray-800">踏雪無痕 (貓咪跑速)</h4>
+                            <p class="text-xs text-gray-500">提升貓咪跟隨游標的移動速度</p>
+                            <span id="speedLvl" class="text-xs font-semibold text-orange-500 block mt-1">目前等級: 1</span>
+                        </div>
+                    </div>
+                    <button id="buySpeed" onclick="buyUpgrade('speed')" class="bg-pink-500 hover:bg-pink-600 text-white font-bold px-4 py-2 rounded-xl text-sm transition-colors flex flex-col items-center">
+                        <span>升級</span>
+                        <span id="speedCost" class="text-xs text-pink-100">💰 50</span>
+                    </button>
+                </div>
+
+                <!-- Upgrade Item 2 -->
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-pink-100 flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="bg-purple-100 w-12 h-12 rounded-xl flex items-center justify-center text-2xl">🧲</div>
+                        <div>
+                            <h4 class="font-bold text-gray-800">主子的魅力 (吸塵磁鐵)</h4>
+                            <p class="text-xs text-gray-500">增加吸取周圍飼料與貓罐頭的距離</p>
+                            <span id="magnetLvl" class="text-xs font-semibold text-purple-500 block mt-1">目前等級: 1</span>
+                        </div>
+                    </div>
+                    <button id="buyMagnet" onclick="buyUpgrade('magnet')" class="bg-pink-500 hover:bg-pink-600 text-white font-bold px-4 py-2 rounded-xl text-sm transition-colors flex flex-col items-center">
+                        <span>升級</span>
+                        <span id="magnetCost" class="text-xs text-pink-100">💰 75</span>
+                    </button>
+                </div>
+
+                <!-- Upgrade Item 3 -->
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-pink-100 flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="bg-blue-100 w-12 h-12 rounded-xl flex items-center justify-center text-2xl">✂️</div>
+                        <div>
+                            <h4 class="font-bold text-gray-800">細胞分裂加速 (分裂門檻降低)</h4>
+                            <p class="text-xs text-gray-500">貓咪不需要長到極大就能提前進行分裂</p>
+                            <span id="splitLvl" class="text-xs font-semibold text-blue-500 block mt-1">目前等級: 1</span>
+                        </div>
+                    </div>
+                    <button id="buySplit" onclick="buyUpgrade('split')" class="bg-pink-500 hover:bg-pink-600 text-white font-bold px-4 py-2 rounded-xl text-sm transition-colors flex flex-col items-center">
+                        <span>升級</span>
+                        <span id="splitCost" class="text-xs text-pink-100">💰 100</span>
+                    </button>
+                </div>
+
+                <!-- Dynamic Skins Shop Section -->
+                <div class="border-t border-pink-100 pt-4">
+                    <h4 class="cute-font text-lg text-pink-600 mb-3"><i class="fa-solid fa-cat mr-1"></i> 解鎖精美貓咪外觀</h4>
+                    <div id="skinsShopContainer" class="grid grid-cols-2 gap-3">
+                        <!-- Dynamic skin cards will render here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div id="gameOverScreen" class="hidden absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/70 p-6 text-center">
+        <div class="max-w-md bg-white rounded-3xl p-8 shadow-2xl border-4 border-red-400 floating-element">
+            <div class="text-7xl mb-4">😿</div>
+            <h2 class="cute-font text-3xl text-red-500 mb-2">喵嗚... 全軍覆沒</h2>
+            <p class="text-gray-500 mb-6">掃地機器人把你的小貓都嚇跑了！</p>
+            
+            <div class="grid grid-cols-2 gap-4 bg-red-50 p-4 rounded-2xl mb-6">
+                <div>
+                    <span class="text-xs text-gray-400 block font-bold">賺得貓幣</span>
+                    <span id="goCoinsEarned" class="cute-font text-xl text-amber-600">+0</span>
+                </div>
+                <div>
+                    <span class="text-xs text-gray-400 block font-bold">最大軍團</span>
+                    <span id="goMaxCats" class="cute-font text-xl text-red-500">0 隻</span>
+                </div>
+            </div>
+
+            <button onclick="restartGame()" class="btn-glow-orange w-full bg-gradient-to-r from-orange-400 to-pink-500 text-white cute-font text-xl py-3 px-6 rounded-2xl shadow-lg">
+                重新挑戰 <i class="fa-solid fa-arrows-rotate ml-2"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Gameplay Canvas -->
+    <canvas id="gameCanvas" class="w-full h-full block"></canvas>
+
+    <!-- Visual Tips overlay (disappears dynamically) -->
+    <div id="hintOverlay" class="absolute bottom-6 left-1/2 -translate-x-1/2 bg-white/85 backdrop-blur-sm py-2 px-6 rounded-full border border-pink-200 text-sm text-gray-600 font-semibold pointer-events-none transition-opacity duration-1000">
+         💡 移動滑鼠/滑動螢幕控制貓咪。吃罐罐變大！按下 <b>[空白鍵]</b> 分裂！
+    </div>
+
+    <!-- On-screen pop hints container for feedback -->
+    <div id="toastMessage" class="pointer-events-none absolute bottom-20 left-1/2 -translate-x-1/2 bg-red-500 text-white font-bold py-2 px-6 rounded-full shadow-lg opacity-0 transition-opacity duration-300 z-40">
+         喵～再多吃一點罐罐才能分裂喔！
+    </div>
+
+    <!-- Background music & Sound effect Toggle -->
+    <div class="absolute bottom-4 left-4 z-40 pointer-events-auto flex items-center gap-2">
+        <button id="audioToggle" onclick="toggleAudio()" class="bg-white/80 hover:bg-white text-[#FF6B6B] rounded-full w-10 h-10 flex items-center justify-center shadow-md transition-colors">
+            <i class="fa-solid fa-volume-high"></i>
+        </button>
+    </div>
+
+    <script>
+        // Synthesizing real retro cozy cat game sound effects mathematically
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let soundEnabled = true;
+
+        function playSynthSound(type) {
+            if (!soundEnabled) return;
+            try {
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+
+                const now = audioCtx.currentTime;
+                
+                if (type === 'crunch') {
+                    // Feed eating crunch
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(150, now);
+                    osc.frequency.exponentialRampToValueAtTime(80, now + 0.08);
+                    
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+                    
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.08);
+
+                    // Noise burst for crunchy texture
+                    const bufferSize = audioCtx.sampleRate * 0.04;
+                    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                    const data = buffer.getChannelData(0);
+                    for (let i = 0; i < bufferSize; i++) {
+                        data[i] = Math.random() * 2 - 1;
+                    }
+                    const noise = audioCtx.createBufferSource();
+                    noise.buffer = buffer;
+                    const noiseGain = audioCtx.createGain();
+                    noiseGain.gain.setValueAtTime(0.15, now);
+                    noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.04);
+                    noise.connect(noiseGain);
+                    noiseGain.connect(audioCtx.destination);
+                    noise.start(now);
+                } 
+                else if (type === 'meow') {
+                    // A cute cat meow pitch-bend sweep
+                    const osc = audioCtx.createOscillator();
+                    const osc2 = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(600, now);
+                    osc.frequency.exponentialRampToValueAtTime(1200, now + 0.1);
+                    osc.frequency.exponentialRampToValueAtTime(800, now + 0.25);
+
+                    osc2.type = 'sine';
+                    osc2.frequency.setValueAtTime(1200, now);
+                    osc2.frequency.exponentialRampToValueAtTime(2400, now + 0.1);
+                    osc2.frequency.exponentialRampToValueAtTime(1600, now + 0.25);
+                    
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                    
+                    osc.connect(gain);
+                    osc2.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    
+                    osc.start(now);
+                    osc2.start(now);
+                    osc.stop(now + 0.3);
+                    osc2.stop(now + 0.3);
+                }
+                else if (type === 'split') {
+                    // Splitting cute bubble/pop sound
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(300, now);
+                    osc.frequency.exponentialRampToValueAtTime(1500, now + 0.15);
+                    
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                    
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.15);
+                }
+                else if (type === 'scared') {
+                    // Cat gets scared / hit by Roomba
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(400, now);
+                    osc.frequency.linearRampToValueAtTime(100, now + 0.3);
+                    
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                    
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                }
+                else if (type === 'upgrade') {
+                    // Delightful positive chime scale
+                    const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+                    notes.forEach((freq, idx) => {
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+                        gain.gain.setValueAtTime(0.1, now + idx * 0.08);
+                        gain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.08 + 0.2);
+                        osc.connect(gain);
+                        gain.connect(audioCtx.destination);
+                        osc.start(now + idx * 0.08);
+                        osc.stop(now + idx * 0.08 + 0.2);
+                    });
+                }
+            } catch (e) {
+                console.warn("Audio Context Error: Make sure your system allows dynamic audio playing.", e);
+            }
+        }
+
+        function toggleAudio() {
+            soundEnabled = !soundEnabled;
+            const btn = document.getElementById('audioToggle');
+            if (soundEnabled) {
+                btn.innerHTML = `<i class="fa-solid fa-volume-high"></i>`;
+                btn.className = "bg-white/80 hover:bg-white text-[#FF6B6B] rounded-full w-10 h-10 flex items-center justify-center shadow-md transition-colors";
+            } else {
+                btn.innerHTML = `<i class="fa-solid fa-volume-xmark"></i>`;
+                btn.className = "bg-gray-200 text-gray-400 rounded-full w-10 h-10 flex items-center justify-center shadow-md transition-colors";
+            }
+        }
+
+        // Configuration for different skins of cats
+        const SKINS = {
+            orange: { id: 'orange', name: '大橘貓', color: '#FDBA74', earColor: '#F97316', stripeColor: '#EA580C', cost: 0, unlocked: true },
+            calico: { id: 'calico', name: '三花貓', color: '#FFF7ED', earColor: '#F97316', stripeColor: '#374151', cost: 100, unlocked: false },
+            tuxedo: { id: 'tuxedo', name: '賓士貓', color: '#1F2937', earColor: '#FFF', stripeColor: '#FFF', cost: 200, unlocked: false },
+            siamese: { id: 'siamese', name: '暹羅貓', color: '#E5E7EB', earColor: '#78350F', stripeColor: '#451A03', cost: 350, unlocked: false },
+            shadow: { id: 'shadow', name: '極黑貓', color: '#111827', earColor: '#FCA5A5', stripeColor: '#374151', cost: 500, unlocked: false }
+        };
+
+        let currentSelectedSkin = 'orange';
+
+        // Load stats & upgrades from LocalStorage
+        let playerStats = {
+            coins: 0,
+            highScore: 0,
+            upgrades: {
+                speed: 1,      // Speed multiplier
+                magnet: 1,     // Magnet food pull distance
+                split: 1       // Easier split threshold
+            },
+            unlockedSkins: ['orange']
+        };
+
+        function saveStats() {
+            localStorage.setItem('cat_growth_game_stats_v3', JSON.stringify(playerStats));
+        }
+
+        function loadStats() {
+            const saved = localStorage.getItem('cat_growth_game_stats_v3');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    if (parsed.coins !== undefined) playerStats.coins = parsed.coins;
+                    if (parsed.highScore !== undefined) playerStats.highScore = parsed.highScore;
+                    if (parsed.upgrades) playerStats.upgrades = {...playerStats.upgrades, ...parsed.upgrades};
+                    if (parsed.unlockedSkins) {
+                        playerStats.unlockedSkins = parsed.unlockedSkins;
+                        playerStats.unlockedSkins.forEach(id => {
+                            if (SKINS[id]) SKINS[id].unlocked = true;
+                        });
+                    }
+                } catch (e) {
+                    console.error("Failed to load local storage stats.", e);
+                }
+            }
+        }
+
+        function initSkinUI() {
+            const container = document.getElementById('skinSelector');
+            container.innerHTML = '';
+            
+            Object.values(SKINS).forEach(skin => {
+                if (skin.unlocked) {
+                    const isSelected = skin.id === currentSelectedSkin;
+                    const btn = document.createElement('button');
+                    btn.type = "button";
+                    btn.className = `w-14 h-14 rounded-full border-4 flex flex-col items-center justify-center transition-all ${
+                        isSelected ? 'border-pink-500 scale-110 bg-white' : 'border-gray-200 hover:border-pink-300 bg-gray-50'
+                    }`;
+                    btn.title = skin.name;
+                    btn.innerHTML = `
+                        <div class="w-7 h-7 rounded-full shadow-inner relative flex items-center justify-center" style="background-color: ${skin.color}">
+                            <div class="absolute -top-1 -left-1 w-3 h-3 rotate-12" style="border-left: 5px solid transparent; border-right: 5px solid transparent; border-bottom: 7px solid ${skin.earColor}"></div>
+                            <div class="absolute -top-1 -right-1 w-3 h-3 -rotate-12" style="border-left: 5px solid transparent; border-right: 5px solid transparent; border-bottom: 7px solid ${skin.earColor}"></div>
+                        </div>
+                        <span class="text-[10px] font-bold text-gray-600 mt-1 truncate max-w-[50px]">${skin.name}</span>
+                    `;
+                    btn.onclick = () => {
+                        currentSelectedSkin = skin.id;
+                        initSkinUI();
+                        playSynthSound('meow');
+                    };
+                    container.appendChild(btn);
+                }
+            });
+
+            // Update skins inside shop container
+            const shopContainer = document.getElementById('skinsShopContainer');
+            shopContainer.innerHTML = '';
+
+            Object.values(SKINS).forEach(skin => {
+                const card = document.createElement('div');
+                card.className = "bg-white p-3 rounded-2xl border border-pink-100 flex flex-col items-center justify-between text-center relative";
+                
+                let actionBtn = '';
+                if (skin.unlocked) {
+                    actionBtn = `<span class="text-xs text-green-500 font-bold bg-green-50 px-3 py-1 rounded-full border border-green-200">已解鎖</span>`;
+                } else {
+                    actionBtn = `
+                        <button onclick="buySkin('${skin.id}')" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-1.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1 transition-colors">
+                            💰 ${skin.cost} 購買
+                        </button>
+                    `;
+                }
+
+                card.innerHTML = `
+                    <div class="w-12 h-12 rounded-full relative flex items-center justify-center mb-2 shadow-sm" style="background-color: ${skin.color}">
+                        <div class="absolute -top-1.5 -left-1.5 w-4.5 h-4.5 rotate-12" style="border-left: 7px solid transparent; border-right: 7px solid transparent; border-bottom: 9px solid ${skin.earColor}"></div>
+                        <div class="absolute -top-1.5 -right-1.5 w-4.5 h-4.5 -rotate-12" style="border-left: 7px solid transparent; border-right: 7px solid transparent; border-bottom: 9px solid ${skin.earColor}"></div>
+                    </div>
+                    <h5 class="font-bold text-gray-800 text-sm mb-2">${skin.name}</h5>
+                    <div class="w-full">${actionBtn}</div>
+                `;
+                shopContainer.appendChild(card);
+            });
+        }
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let isRunning = false;
+        let cats = [];
+        let foods = [];
+        let roombas = [];
+        let particles = [];
+        let maxCatsAchieved = 1;
+        let score = 0;
+
+        // Tracking cursor position
+        let targetX = window.innerWidth / 2;
+        let targetY = window.innerHeight / 2;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            if (!isRunning) {
+                targetX = canvas.width / 2;
+                targetY = canvas.height / 2;
+            }
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // Mouse & Touch Tracking
+        window.addEventListener('mousemove', (e) => {
+            targetX = e.clientX;
+            targetY = e.clientY;
+        });
+
+        window.addEventListener('touchmove', (e) => {
+            if (e.touches.length > 0) {
+                targetX = e.touches[0].clientX;
+                targetY = e.touches[0].clientY;
+            }
+        }, { passive: true });
+
+        // Focus fixing
+        window.addEventListener('click', () => {
+            window.focus();
+        });
+
+        // Split with Space key
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                triggerSplit();
+            }
+        });
+
+        function toggleShop() {
+            const modal = document.getElementById('shopModal');
+            modal.classList.toggle('hidden');
+            if (!modal.classList.contains('hidden')) {
+                document.getElementById('shopCoins').innerHTML = `<i class="fa-solid fa-coins mr-1"></i>${playerStats.coins}`;
+                
+                const speedCost = getUpgradeCost('speed', playerStats.upgrades.speed);
+                document.getElementById('speedLvl').innerText = `目前等級: ${playerStats.upgrades.speed}`;
+                document.getElementById('speedCost').innerText = speedCost === 'MAX' ? 'MAX' : `💰 ${speedCost}`;
+                
+                const magnetCost = getUpgradeCost('magnet', playerStats.upgrades.magnet);
+                document.getElementById('magnetLvl').innerText = `目前等級: ${playerStats.upgrades.magnet}`;
+                document.getElementById('magnetCost').innerText = magnetCost === 'MAX' ? 'MAX' : `💰 ${magnetCost}`;
+
+                const splitCost = getUpgradeCost('split', playerStats.upgrades.split);
+                document.getElementById('splitLvl').innerText = `目前等級: ${playerStats.upgrades.split}`;
+                document.getElementById('splitCost').innerText = splitCost === 'MAX' ? 'MAX' : `💰 ${splitCost}`;
+            }
+        }
+
+        function getUpgradeCost(type, currentLvl) {
+            if (currentLvl >= 10) return 'MAX';
+            const baseCosts = { speed: 40, magnet: 60, split: 80 };
+            return baseCosts[type] * Math.pow(1.5, currentLvl - 1);
+        }
+
+        function buyUpgrade(type) {
+            const currentLvl = playerStats.upgrades[type];
+            const cost = getUpgradeCost(type, currentLvl);
+            if (cost === 'MAX') return;
+
+            if (playerStats.coins >= cost) {
+                playerStats.coins -= cost;
+                playerStats.upgrades[type]++;
+                saveStats();
+                playSynthSound('upgrade');
+                
+                document.getElementById('uiCoins').innerHTML = `<i class="fa-solid fa-coins mr-1"></i>${playerStats.coins}`;
+                toggleShop();
+                toggleShop();
+            } else {
+                showToast("喵嗚~ 你的貓幣不夠用喔！多吃點好料來賺貓幣吧！");
+            }
+        }
+
+        function buySkin(skinId) {
+            const skin = SKINS[skinId];
+            if (!skin) return;
+
+            if (playerStats.coins >= skin.cost) {
+                playerStats.coins -= skin.cost;
+                skin.unlocked = true;
+                playerStats.unlockedSkins.push(skinId);
+                saveStats();
+                playSynthSound('upgrade');
+                initSkinUI();
+                
+                document.getElementById('uiCoins').innerHTML = `<i class="fa-solid fa-coins mr-1"></i>${playerStats.coins}`;
+            } else {
+                showToast("貓幣不足，無法解鎖這個可愛的新外觀！");
+            }
+        }
+
+        function showToast(text) {
+            const toast = document.getElementById('toastMessage');
+            toast.innerText = text;
+            toast.classList.remove('opacity-0');
+            toast.classList.add('opacity-100');
+            setTimeout(() => {
+                toast.classList.remove('opacity-100');
+                toast.classList.add('opacity-0');
+            }, 2500);
+        }
+
+        class Cat {
+            constructor(x, y, radius, skinId = 'orange') {
+                this.x = x;
+                this.y = y;
+                this.radius = radius; 
+                this.targetRadius = radius; 
+                this.skinId = skinId;
+                this.angle = 0;
+                this.tailWiggle = 0;
+                this.pawStep = 0;
+                this.isBlinking = false;
+                this.blinkTimer = Math.random() * 200 + 100;
+                this.velocity = { x: 0, y: 0 };
+            }
+
+            update() {
+                // Lerp radius
+                this.radius += (this.targetRadius - this.radius) * 0.1;
+
+                // Move toward cursor with smooth inertia
+                const dx = targetX - this.x;
+                const dy = targetY - this.y;
+                const dist = Math.hypot(dx, dy);
+
+                // Base speed calculated by upgrade tier
+                const speedFactor = 0.03 + (playerStats.upgrades.speed * 0.005);
+                
+                if (dist > 5) {
+                    this.velocity.x += (dx / dist) * dist * speedFactor - this.velocity.x * 0.15;
+                    this.velocity.y += (dy / dist) * dist * speedFactor - this.velocity.y * 0.15;
+                    
+                    this.x += this.velocity.x;
+                    this.y += this.velocity.y;
+                    
+                    this.angle = Math.atan2(this.velocity.y, this.velocity.x);
+                    this.pawStep += Math.hypot(this.velocity.x, this.velocity.y) * 0.1;
+                } else {
+                    this.velocity.x *= 0.5;
+                    this.velocity.y *= 0.5;
+                }
+
+                this.tailWiggle += 0.08;
+
+                // Handle eye blink timer
+                this.blinkTimer--;
+                if (this.blinkTimer <= 0) {
+                    this.isBlinking = !this.isBlinking;
+                    this.blinkTimer = this.isBlinking ? 10 : Math.random() * 200 + 120;
+                }
+
+                // Contain cats inside canvas view bounds
+                this.x = Math.max(this.radius, Math.min(canvas.width - this.radius, this.x));
+                this.y = Math.max(this.radius, Math.min(canvas.height - this.radius, this.y));
+            }
+
+            draw() {
+                const skin = SKINS[this.skinId] || SKINS.orange;
+                // Lowered split threshold to 25 (Starts at 25 - level multiplier)
+                const splitThreshold = 25 - (playerStats.upgrades.split * 1.0);
+
+                // Highlight cat when ready to split
+                if (this.radius >= splitThreshold) {
+                    ctx.save();
+                    ctx.translate(this.x, this.y);
+                    ctx.strokeStyle = '#10B981';
+                    ctx.lineWidth = 3;
+                    ctx.setLineDash([6, 4]);
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.radius * 1.35, 0, Math.PI * 2);
+                    ctx.stroke();
+
+                    // Tiny float text "READY"
+                    ctx.fillStyle = '#10B981';
+                    ctx.font = 'bold 11px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('READY!', 0, -this.radius * 1.5);
+                    ctx.restore();
+                }
+
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.angle);
+
+                const r = this.radius;
+
+                // 1. Draw Tail
+                ctx.save();
+                ctx.translate(-r * 0.8, 0);
+                const wiggle = Math.sin(this.tailWiggle) * 0.3;
+                ctx.rotate(wiggle);
+                ctx.beginPath();
+                ctx.strokeStyle = skin.color;
+                ctx.lineWidth = r * 0.35;
+                ctx.lineCap = 'round';
+                ctx.moveTo(0, 0);
+                ctx.quadraticCurveTo(-r * 0.5, -r * 0.3, -r * 0.8, 0);
+                ctx.stroke();
+                ctx.restore();
+
+                // 2. Draw Moving Paws
+                const pawOffset = Math.sin(this.pawStep) * (r * 0.25);
+                ctx.fillStyle = '#FFF'; 
+                
+                ctx.beginPath();
+                ctx.arc(r * 0.4, -r * 0.7 + pawOffset, r * 0.18, 0, Math.PI * 2);
+                ctx.arc(-r * 0.4, -r * 0.7 - pawOffset, r * 0.18, 0, Math.PI * 2);
+                ctx.arc(r * 0.4, r * 0.7 - pawOffset, r * 0.18, 0, Math.PI * 2);
+                ctx.arc(-r * 0.4, r * 0.7 + pawOffset, r * 0.18, 0, Math.PI * 2);
+                ctx.fill();
+
+                // 3. Draw Body
+                ctx.fillStyle = skin.color;
+                ctx.beginPath();
+                ctx.ellipse(0, 0, r, r * 0.85, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // 4. Back Stripes / Calico Spots
+                if (this.skinId === 'calico') {
+                    ctx.fillStyle = '#F97316';
+                    ctx.beginPath();
+                    ctx.arc(-r * 0.3, -r * 0.3, r * 0.4, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#374151';
+                    ctx.beginPath();
+                    ctx.arc(0, r * 0.3, r * 0.35, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (this.skinId === 'tuxedo') {
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.beginPath();
+                    ctx.ellipse(r * 0.3, 0, r * 0.4, r * 0.45, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (this.skinId === 'orange' || this.skinId === 'siamese') {
+                    ctx.fillStyle = skin.stripeColor;
+                    ctx.beginPath();
+                    ctx.moveTo(-r * 0.1, -r * 0.6); ctx.lineTo(-r * 0.4, -r * 0.5); ctx.lineTo(-r * 0.1, -r * 0.4);
+                    ctx.moveTo(-r * 0.1, r * 0.6); ctx.lineTo(-r * 0.4, r * 0.5); ctx.lineTo(-r * 0.1, r * 0.4);
+                    ctx.fill();
+                }
+
+                // 5. Draw Cute Ears
+                ctx.fillStyle = skin.earColor;
+                ctx.beginPath();
+                ctx.moveTo(r * 0.3, -r * 0.75);
+                ctx.lineTo(r * 0.8, -r * 0.4);
+                ctx.lineTo(r * 0.5, -r * 0.1);
+                ctx.closePath();
+                ctx.fill();
+                
+                ctx.beginPath();
+                ctx.moveTo(r * 0.3, r * 0.75);
+                ctx.lineTo(r * 0.8, r * 0.4);
+                ctx.lineTo(r * 0.5, r * 0.1);
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.fillStyle = '#FFAAAA';
+                ctx.beginPath();
+                ctx.moveTo(r * 0.4, -r * 0.65);
+                ctx.lineTo(r * 0.7, -r * 0.45);
+                ctx.lineTo(r * 0.5, -r * 0.25);
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.moveTo(r * 0.4, r * 0.65);
+                ctx.lineTo(r * 0.7, r * 0.45);
+                ctx.lineTo(r * 0.5, r * 0.25);
+                ctx.closePath();
+                ctx.fill();
+
+                // 6. Draw Face
+                ctx.translate(r * 0.35, 0);
+
+                // Eyes
+                ctx.fillStyle = '#222';
+                const eyeRadius = r * 0.09;
+                if (this.isBlinking) {
+                    ctx.strokeStyle = '#222';
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.moveTo(r * 0.2, -r * 0.25);
+                    ctx.lineTo(r * 0.2, -r * 0.15);
+                    ctx.moveTo(r * 0.2, r * 0.15);
+                    ctx.lineTo(r * 0.2, r * 0.25);
+                    ctx.stroke();
+                } else {
+                    ctx.beginPath();
+                    ctx.arc(r * 0.2, -r * 0.2, eyeRadius, 0, Math.PI * 2);
+                    ctx.arc(r * 0.2, r * 0.2, eyeRadius, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.fillStyle = '#FFF';
+                    ctx.beginPath();
+                    ctx.arc(r * 0.23, -r * 0.22, eyeRadius * 0.4, 0, Math.PI * 2);
+                    ctx.arc(r * 0.23, r * 0.18, eyeRadius * 0.4, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                // Pink nose
+                ctx.fillStyle = '#FFAAAA';
+                ctx.beginPath();
+                ctx.moveTo(r * 0.26, -r * 0.04);
+                ctx.lineTo(r * 0.26, r * 0.04);
+                ctx.lineTo(r * 0.32, 0);
+                ctx.closePath();
+                ctx.fill();
+
+                // Blush
+                ctx.fillStyle = 'rgba(255, 100, 100, 0.35)';
+                ctx.beginPath();
+                ctx.arc(r * 0.14, -r * 0.35, r * 0.12, 0, Math.PI * 2);
+                ctx.arc(r * 0.14, r * 0.35, r * 0.12, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Whiskers
+                ctx.strokeStyle = '#888';
+                ctx.lineWidth = 1.5 * (r / 25);
+                ctx.beginPath();
+                ctx.moveTo(r * 0.2, -r * 0.1); ctx.lineTo(r * 0.5, -r * 0.3);
+                ctx.moveTo(r * 0.2, -r * 0.05); ctx.lineTo(r * 0.55, -r * 0.1);
+                ctx.moveTo(r * 0.2, r * 0.1); ctx.lineTo(r * 0.5, r * 0.3);
+                ctx.moveTo(r * 0.2, r * 0.05); ctx.lineTo(r * 0.55, r * 0.1);
+                ctx.stroke();
+
+                ctx.restore();
+            }
+        }
+
+        class Food {
+            constructor() {
+                this.x = Math.random() * (canvas.width - 40) + 20;
+                this.y = Math.random() * (canvas.height - 40) + 20;
+                
+                const rand = Math.random();
+                if (rand < 0.65) {
+                    this.type = 'kibble'; 
+                    this.color = '#B91C1C';
+                    this.nutrition = 3.5; // Raised slightly to speed up growth
+                    this.points = 1;
+                    this.coinChance = 0.25;
+                    this.emoji = '🟤';
+                } else if (rand < 0.90) {
+                    this.type = 'can'; 
+                    this.color = '#3B82F6';
+                    this.nutrition = 8.0; // Raised from 6.0
+                    this.points = 5;
+                    this.coinChance = 0.85;
+                    this.emoji = '🥫';
+                } else {
+                    this.type = 'catnip'; 
+                    this.color = '#F59E0B';
+                    this.nutrition = 15.0; // Raised from 12.0
+                    this.points = 15;
+                    this.coinChance = 1.0;
+                    this.emoji = '🐟';
+                }
+                this.radius = this.type === 'kibble' ? 8 : (this.type === 'can' ? 14 : 18);
+                this.angle = Math.random() * Math.PI * 2;
+                this.bounceOffset = Math.random() * 100;
+            }
+
+            draw() {
+                const bounce = Math.sin((Date.now() / 200) + this.bounceOffset) * 2.5;
+                ctx.save();
+                ctx.translate(this.x, this.y + bounce);
+                ctx.rotate(this.angle);
+
+                ctx.font = `${this.radius * 1.8}px serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(this.emoji, 0, 0);
+
+                ctx.restore();
+            }
+        }
+
+        class Roomba {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.radius = 28;
+                this.speed = 2.2 + Math.random() * 1.8;
+                this.angle = Math.random() * Math.PI * 2;
+                this.angryTime = 0;
+            }
+
+            update() {
+                this.x += Math.cos(this.angle) * this.speed;
+                this.y += Math.sin(this.angle) * this.speed;
+
+                if (this.x < this.radius || this.x > canvas.width - this.radius) {
+                    this.angle = Math.PI - this.angle;
+                    this.x = Math.max(this.radius, Math.min(canvas.width - this.radius, this.x));
+                }
+                if (this.y < this.radius || this.y > canvas.height - this.radius) {
+                    this.angle = -this.angle;
+                    this.y = Math.max(this.radius, Math.min(canvas.height - this.radius, this.y));
+                }
+
+                if (this.angryTime > 0) this.angryTime--;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
+                ctx.shadowBlur = 10;
+
+                ctx.fillStyle = this.angryTime > 0 ? '#EF4444' : '#4B5563';
+                ctx.beginPath();
+                ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0; 
+
+                ctx.strokeStyle = '#1F2937';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+
+                ctx.fillStyle = this.angryTime > 0 ? '#FEE2E2' : '#6EE7B7';
+                ctx.beginPath();
+                ctx.arc(this.radius * 0.4, 0, 5, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.strokeStyle = '#9CA3AF';
+                ctx.lineWidth = 2;
+                ctx.rotate(Date.now() / 150);
+                for (let i = 0; i < 3; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.lineTo(0, -this.radius * 0.75);
+                    ctx.stroke();
+                    ctx.rotate((Math.PI * 2) / 3);
+                }
+
+                ctx.restore();
+            }
+        }
+
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.vx = (Math.random() - 0.5) * 8;
+                this.vy = (Math.random() - 0.5) * 8;
+                this.color = color;
+                this.alpha = 1;
+                this.decay = 0.03 + Math.random() * 0.03;
+                this.size = 3 + Math.random() * 4;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.alpha -= this.decay;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        function triggerSplit() {
+            if (!isRunning) return;
+
+            if (cats.length >= 50) {
+                showToast("喵～軍團數量已達最高上限 50 隻囉！");
+                return;
+            }
+
+            // Extremely accessible split threshold (Starts at 25, meaning 25px size needed)
+            const splitThreshold = 25 - (playerStats.upgrades.split * 1.0);
+
+            let didSplit = false;
+            const originalLength = cats.length;
+
+            for (let i = 0; i < originalLength; i++) {
+                const cat = cats[i];
+                if (cat.radius >= splitThreshold && cats.length < 50) {
+                    const halfRadius = cat.radius * 0.72; 
+                    cat.targetRadius = halfRadius;
+                    cat.radius = halfRadius;
+
+                    const angleOffset = Math.random() * Math.PI * 2;
+                    const clone = new Cat(
+                        cat.x + Math.cos(angleOffset) * halfRadius * 1.5,
+                        cat.y + Math.sin(angleOffset) * halfRadius * 1.5,
+                        halfRadius,
+                        cat.skinId
+                    );
+                    
+                    cat.velocity.x += Math.cos(angleOffset) * 6;
+                    cat.velocity.y += Math.sin(angleOffset) * 6;
+                    clone.velocity.x -= Math.cos(angleOffset) * 6;
+                    clone.velocity.y -= Math.sin(angleOffset) * 6;
+
+                    cats.push(clone);
+                    didSplit = true;
+
+                    for (let p = 0; p < 8; p++) {
+                        particles.push(new Particle(cat.x, cat.y, '#FFF'));
+                    }
+                }
+            }
+
+            if (didSplit) {
+                playSynthSound('split');
+                if (cats.length > maxCatsAchieved) {
+                    maxCatsAchieved = cats.length;
+                }
+                updateHUD();
+            } else {
+                // Inform player they are not big enough yet
+                showToast("喵嗚～貓咪還要再吃大一點才能分裂喔！可以按「瞬間變大」測試！");
+            }
+        }
+
+        function spawnFoodIfNeeded() {
+            const maxFood = 25 + cats.length * 3;
+            while (foods.length < maxFood) {
+                foods.push(new Food());
+            }
+        }
+
+        function spawnRoombas() {
+            const neededRoombas = Math.min(8, 2 + Math.floor(cats.length / 5));
+            while (roombas.length < neededRoombas) {
+                roombas.push(new Roomba());
+            }
+            while (roombas.length > neededRoombas) {
+                roombas.pop();
+            }
+        }
+
+        function checkCollisions() {
+            const magnetRadiusMultiplier = 1 + (playerStats.upgrades.magnet * 0.25);
+
+            // 1. Cat & Food collision
+            for (let f = foods.length - 1; f >= 0; f--) {
+                const food = foods[f];
+                let isEaten = false;
+
+                for (let c = 0; c < cats.length; c++) {
+                    const cat = cats[c];
+                    const dist = Math.hypot(food.x - cat.x, food.y - cat.y);
+
+                    // Magnet draw attraction
+                    const magnetRange = cat.radius * 2.2 * magnetRadiusMultiplier;
+                    if (dist < magnetRange && dist > cat.radius) {
+                        const pullSpeed = 4.5;
+                        food.x += ((cat.x - food.x) / dist) * pullSpeed;
+                        food.y += ((cat.y - food.y) / dist) * pullSpeed;
+                    }
+
+                    const eatDistance = cat.radius + food.radius * 0.5;
+                    if (dist < eatDistance) {
+                        isEaten = true;
+                        
+                        if (cat.targetRadius < 90) {
+                            cat.targetRadius += food.nutrition;
+                        }
+
+                        score += food.points;
+                        if (score > playerStats.highScore) {
+                            playerStats.highScore = score;
+                        }
+
+                        if (Math.random() < food.coinChance) {
+                            playerStats.coins += 1;
+                        }
+
+                        playSynthSound('crunch');
+                        for (let p = 0; p < 6; p++) {
+                            particles.push(new Particle(food.x, food.y, food.color));
+                        }
+                        
+                        break; 
+                    }
+                }
+
+                if (isEaten) {
+                    foods.splice(f, 1);
+                }
+            }
+
+            // 2. Swarm Flocking Separation
+            for (let i = 0; i < cats.length; i++) {
+                for (let j = i + 1; j < cats.length; j++) {
+                    const c1 = cats[i];
+                    const c2 = cats[j];
+                    const dx = c2.x - c1.x;
+                    const dy = c2.y - c1.y;
+                    const dist = Math.hypot(dx, dy);
+                    const minDist = (c1.radius + c2.radius) * 0.85;
+
+                    if (dist < minDist) {
+                        const overlap = minDist - dist;
+                        const forceX = (dx / (dist || 1)) * overlap * 0.08;
+                        const forceY = (dy / (dist || 1)) * overlap * 0.08;
+                        
+                        c2.x += forceX;
+                        c2.y += forceY;
+                        c1.x -= forceX;
+                        c1.y -= forceY;
+                    }
+                }
+            }
+
+            // 3. Roomba Collision
+            for (let r = 0; r < roombas.length; r++) {
+                const roomba = roombas[r];
+                for (let c = cats.length - 1; c >= 0; c--) {
+                    const cat = cats[c];
+                    const dist = Math.hypot(roomba.x - cat.x, roomba.y - cat.y);
+                    const hitDist = roomba.radius + cat.radius * 0.7;
+
+                    if (dist < hitDist) {
+                        roomba.angryTime = 40; 
+                        playSynthSound('scared');
+
+                        if (cat.radius > 20) {
+                            cat.targetRadius = Math.max(16, cat.radius * 0.55);
+                            cat.radius = cat.targetRadius;
+                            const angle = Math.atan2(cat.y - roomba.y, cat.x - roomba.x);
+                            cat.velocity.x = Math.cos(angle) * 12;
+                            cat.velocity.y = Math.sin(angle) * 12;
+                        } else {
+                            for (let p = 0; p < 12; p++) {
+                                particles.push(new Particle(cat.x, cat.y, '#FFAAAA'));
+                            }
+                            cats.splice(c, 1);
+                        }
+                        updateHUD();
+                    }
+                }
+            }
+        }
+
+        function updateHUD() {
+            document.getElementById('uiCatCount').innerText = `${cats.length} / 50`;
+            document.getElementById('uiCoins').innerHTML = `<i class="fa-solid fa-coins mr-1"></i>${playerStats.coins}`;
+            document.getElementById('uiScore').innerText = Math.max(score, playerStats.highScore);
+
+            const splitThreshold = 25 - (playerStats.upgrades.split * 1.0);
+            
+            // Find the largest cat's radius
+            let maxRadius = 0;
+            cats.forEach(c => {
+                if (c.radius > maxRadius) maxRadius = c.radius;
+            });
+
+            // Calculate split percentage progress to give direct feedback to players
+            const percent = Math.min(100, Math.floor((maxRadius / splitThreshold) * 100));
+
+            const badge = document.getElementById('splitBadge');
+            const splitBtn = document.getElementById('splitBtn');
+            const canSplit = cats.some(cat => cat.radius >= splitThreshold) && cats.length < 50;
+
+            if (canSplit) {
+                badge.innerText = "READY!";
+                badge.className = "bg-green-500 text-white text-xs px-2 py-0.5 rounded-full font-bold animate-pulse";
+                splitBtn.classList.remove('opacity-60');
+                splitBtn.classList.add('scale-105');
+            } else {
+                badge.innerText = `${percent}%`;
+                badge.className = "bg-orange-200 text-orange-700 text-xs px-2 py-0.5 rounded-full font-bold";
+                splitBtn.classList.add('opacity-60');
+                splitBtn.classList.remove('scale-105');
+            }
+        }
+
+        function checkGameOver() {
+            if (cats.length === 0) {
+                isRunning = false;
+                saveStats();
+
+                document.getElementById('gameOverScreen').classList.remove('hidden');
+                document.getElementById('goCoinsEarned').innerText = `+${Math.floor(score / 15)} 💰`;
+                document.getElementById('goMaxCats').innerText = `${maxCatsAchieved} 隻`;
+            }
+        }
+
+        // Main game ticker animation frame loop
+        function gameLoop() {
+            if (!isRunning) return;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Warm and subtle grid background
+            ctx.strokeStyle = '#FFEBEB';
+            ctx.lineWidth = 1;
+            const gridSize = 60;
+            for (let x = 0; x < canvas.width; x += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            for (let y = 0; y < canvas.height; y += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+
+            // Update & Draw food
+            spawnFoodIfNeeded();
+            foods.forEach(food => food.draw());
+
+            // Update & Draw roombas
+            spawnRoombas();
+            roombas.forEach(roomba => {
+                roomba.update();
+                roomba.draw();
+            });
+
+            // Update & Draw particles
+            for (let p = particles.length - 1; p >= 0; p--) {
+                const part = particles[p];
+                part.update();
+                if (part.alpha <= 0) {
+                    particles.splice(p, 1);
+                } else {
+                    part.draw();
+                }
+            }
+
+            // Update & Draw cats
+            cats.forEach(cat => {
+                cat.update();
+                cat.draw();
+            });
+
+            checkCollisions();
+            updateHUD();
+            checkGameOver();
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function startGame() {
+            document.getElementById('startScreen').classList.add('hidden');
+            
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            score = 0;
+            maxCatsAchieved = 1;
+            cats = [];
+            foods = [];
+            roombas = [];
+            particles = [];
+
+            // Spawn first cat with a larger initial size (21 instead of 16)
+            // It only needs 3-4 points of size (e.g., just 1 single food bite!) to reach 24-25 threshold and split!
+            const startCat = new Cat(canvas.width / 2, canvas.height / 2, 21, currentSelectedSkin);
+            cats.push(startCat);
+
+            isRunning = true;
+            playSynthSound('meow');
+            
+            setTimeout(() => {
+                document.getElementById('hintOverlay').style.opacity = '0';
+            }, 6000);
+
+            gameLoop();
+        }
+
+        // New Cheat function: Instant growth for extremely satisfying split test
+        function cheatGrow() {
+            if (!isRunning) return;
+            cats.forEach(cat => {
+                cat.targetRadius += 10;
+                cat.radius += 10;
+            });
+            playSynthSound('upgrade');
+            showToast("✨ 喵！魔法發動：貓咪瞬間變大，快按分裂！ ✨");
+            updateHUD();
+        }
+
+        function restartGame() {
+            document.getElementById('gameOverScreen').classList.add('hidden');
+            startGame();
+        }
+
+        window.onload = function () {
+            loadStats();
+            initSkinUI();
+            updateHUD();
+        };
+    </script>
+</body>
+</html>
